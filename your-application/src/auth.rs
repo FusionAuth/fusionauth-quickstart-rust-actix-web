@@ -1,4 +1,4 @@
-use actix_web::{get, web, HttpResponse, Responder};
+use actix_web::{get, web, Error, HttpResponse, Responder};
 use actix_session::{Session};
 use std::env;
 use anyhow;
@@ -18,6 +18,7 @@ use oauth2::{
 };
 use oauth2::basic::BasicClient;
 use oauth2::reqwest::async_http_client;
+// use oauth2::reqwest::http_client;
 use serde::Deserialize;
 
 #[get("/logout")]
@@ -46,8 +47,9 @@ struct AuthCallbackParams {
     code: String,
 }
 
+//Result<HttpResponse, Error>
 #[get("/callback")]
-async fn callback(params: web::Query<AuthCallbackParams>, session: Session) -> impl Responder {
+async fn callback(params: web::Query<AuthCallbackParams>, session: Session) ->  impl Responder {
     //callback url from fusionauth: http://localhost:9012/callback?code=4u73uE6d-xbJ5lTBeY2z7cCXMWMEYP_TSB7v_vOdJp4&locale=en&state=XPNMGQfsHPKNP7PK7qyJyg&userState=Authenticated
     let received_state = &params.state;
     if let Ok(saved_state) = session.get::<String>("csrf_token") {
@@ -56,14 +58,20 @@ async fn callback(params: web::Query<AuthCallbackParams>, session: Session) -> i
         }
     }
     else {
-        return HttpResponse::InternalServerError().body("Session error");
+        return HttpResponse::InternalServerError().body("Session error")
     }
     let pkce_verifier = session.get::<String>("pkce_verifier").unwrap().unwrap();
-    // let token_result = get_oauth_client()
-    //     .exchange_code(AuthorizationCode::new(params.code.clone()))
-    //     .set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier))
-    //     .request_async(async_http_client)
-    //     .await?;
+    let token_result = get_oauth_client()
+        .exchange_code(AuthorizationCode::new(params.code.clone()))
+        .set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier))
+        // .request(http_client);
+        .request_async(async_http_client).await?;
+    // {
+    //     Ok(result) => result,
+    //     Err(e) => {
+    //         return Ok(HttpResponse::InternalServerError().body("Internal server error"));
+    //     }
+    // };
     // session.insert("email", token_result.email.to_string().unwrap());
     HttpResponse::Found().append_header(("Location", "/account")).finish()
 }
@@ -77,4 +85,3 @@ fn get_oauth_client() -> BasicClient {
     )
     .set_redirect_uri(RedirectUrl::new(env::var("FUSIONAUTH_REDIRECT_URL").expect("Missing FUSIONAUTH_REDIRECT_URL")).expect("Invalid RedirectUrl"))
 }
-
