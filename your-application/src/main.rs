@@ -1,7 +1,8 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_files as fs;
 
-#[get("/")]
-async fn hello() -> impl Responder {
+#[get("/login")]
+async fn login() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")
 }
 
@@ -18,7 +19,13 @@ async fn hello() -> impl Responder {
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
-            .service(hello)
+            .service(login)
+            .service(fs::Files::new("/static", "static").show_files_listing())
+            .route("/", web::get().to(|| async { fs::NamedFile::open("static/index.html") }))
+            // .handler(
+            //     "/",
+            //     fs::StaticFiles::new("./static/").unwrap().index_file("index.html")
+            // )
             // .service(echo)
             // .route("/hey", web::get().to(manual_hello))
     })

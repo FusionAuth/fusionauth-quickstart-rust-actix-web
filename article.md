@@ -137,7 +137,7 @@ From here on, you'll work in the `your-application` directory. Install the depen
 ```bash
 cd your-application
 cargo init
-cargo add oauth2 actix-web@4
+cargo add actix-web@4 actix-files oauth2
 cargo build
 ```
 
