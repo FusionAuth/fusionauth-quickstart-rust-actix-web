@@ -1,25 +1,8 @@
-// web server
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use actix_files as fs;
-// html templates
 use handlebars::Handlebars;
 use std::collections::HashMap;
-// .env file
-use dotenv::dotenv;
-use std::env;
-
-#[get("/login")]
-async fn login() -> impl Responder {
-    dotenv().ok();
-    let c = env::var("FUSIONAUTH_CLIENT_ID").expect("FUSIONAUTH_CLIENT_ID not found");
-    println!("{}", c);
-    HttpResponse::Ok().body("login")
-}
-
-#[get("/logout")]
-async fn logout() -> impl Responder {
-    HttpResponse::Ok().body("logout")
-}
+mod login;
 
 #[get("/")]
 async fn index(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
@@ -35,12 +18,17 @@ async fn account(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
     HttpResponse::Ok().body(body)
 }
 
+#[get("/logout")]
+async fn logout() -> impl Responder {
+    HttpResponse::Ok().body("logout")
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let handlebars_ref = setup_handlebars().await;
     HttpServer::new(move || {
         App::new()
-            .service(login)
+            .service(login::login)
             .service(logout)
             .service(index)
             .service(account)
