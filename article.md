@@ -145,6 +145,10 @@ Add the following code to your `src/main.rs` file.
 
 <RemoteCode url={frontmatter.codeRoot + "/complete-application/your-application/src/main.rs"}/>
 
+```bash
+cargo run
+```
+
 ## Authentication
 
 Authentication in {frontmatter.language} is managed by [OAuth2](https://docs.rs/oauth2/latest/oauth2/).

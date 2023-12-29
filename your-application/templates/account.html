@@ -1,15 +1,3 @@
-<?php
-verifySession();
-
-function verifySession() {
-    session_start();
-    if (!isset($_SESSION['id'])) {
-        header('Location: login.php');
-        exit;
-    }
-}
-?>
-
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -22,14 +10,14 @@ function verifySession() {
       <div id="logo-header">
         <img src="static/changebank.svg"  alt="logo"/>
         <div class="h-row">
-          <p class="header-email"><?= $_SESSION['email'] ?></p>
-          <a class="button-lg" href="logout.php" onclick="">Logout</a>
+          <p class="header-email">{{email}}</p>
+          <a class="button-lg" href="/logout" onclick="">Logout</a>
         </div>
       </div>
 
       <div id="menu-bar" class="menu-bar">
-        <a class="menu-link inactive" href="change.php">Make Change</a>
-        <a class="menu-link" href="account.php">Account</a>
+        <a class="menu-link inactive" href="/change">Make Change</a>
+        <a class="menu-link" href="/account">Account</a>
       </div>
     </div>
 
