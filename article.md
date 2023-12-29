@@ -30,10 +30,13 @@ Find the Docker Compose file and source code for the complete application at <a 
 For this quickstart, you'll need:
 
 * [Docker](https://www.docker.com) version 20 or later, which is the quickest way to start FusionAuth. (There are [other ways](/docs/v1/tech/installation-guide/).)
+* {frontmatter.language}.
+<!-- sudo apt install rustc cargo -->
 
-You will run Rust in Docker. Using Docker makes this tutorial suitable for Windows, Linux, and macOS.
 
-If you already have Rust installed locally, you can follow this tutorial on your host machine instead and convert commands to work on your operating system.
+<!-- You will run Rust in Docker. Using Docker makes this tutorial suitable for Windows, Linux, and macOS. -->
+
+<!-- If you already have Rust installed locally, you can follow this tutorial on your host machine instead and convert commands to work on your operating system. -->
 
 ## General Architecture
 
@@ -58,8 +61,8 @@ Start with getting FusionAuth up and running and creating a new {frontmatter.fra
 First, grab the code from the repository and change to that folder.
 
 ```shell
-git clone https://github.com/FusionAuth/fusionauth-quickstart-php-web.git
-cd fusionauth-quickstart-php-web
+git clone https://github.com/FusionAuth/fusionauth-quickstart-rust-actix-web.git
+cd fusionauth-quickstart-rust-actix-web
 mkdir your-application
 ```
 
@@ -77,7 +80,7 @@ Assuming you have Docker installed, you can start FusionAuth on your machine wit
 docker compose up
 ```
 
-This will start four containers, one each for FusionAuth, Postgres, OpenSearch, and Rust.
+This will start three containers, one each for FusionAuth, Postgres, and OpenSearch.
 
 Here you are using a bootstrapping feature of FusionAuth called [Kickstart](/docs/v1/tech/installation-guide/kickstart). When FusionAuth starts for the first time, it will look at the `kickstart/kickstart.json` file and configure FusionAuth to your specified state.
 
@@ -105,16 +108,7 @@ You can log in to the [FusionAuth admin UI](http://localhost:9011/admin) and loo
 
 While this guide builds a new {frontmatter.framework} project, you can use the same method to integrate your existing project with FusionAuth.
 
-<Aside type="note">
-  Note that the `phpimage.Dockerfile` in the root directory of the project configures Apache to serve files from the `public` directory over the web, to hide `vendor` and configuration files. If you're not using Docker, you will need to do this yourself.
-
-  ```
-  RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
-  RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/apache2.conf
-  ```
-</Aside>
-
-In the `docker-compose` configuration, the `--volume ./your-application:/var/www/html` parameter shares your current folder with the container so both your physical machine and Docker can read and write the same files.
+<!-- In the `docker-compose` configuration, the `--volume ./your-application:/app` parameter shares your current folder with the container so both your physical machine and Docker can read and write the same files. -->
 
 <Aside type="note">
   If you simply want to run the application and not create your own, there is a completed version in the `complete-application` directory. You can use the following commands to get it up and running.
@@ -127,11 +121,25 @@ In the `docker-compose` configuration, the `--volume ./your-application:/var/www
   View the application at http://localhost:9012.
 </Aside>
 
-Before you start coding, you need to install the PHP module for your app to communicate with FusionAuth. Run the following command.
+<!-- Before you start coding, you need to install the PHP module for your app to communicate with FusionAuth. Run the following command. -->
+
+<!-- ```bash
+docker run --rm -v "$(pwd)/your-application:/app" rust:1.75 /bin/bash -c "cd /app && cargo init && cargo add oauth2"
+```
+
+-  `--rm` — Removes the container when it finishes running.
+-  `-v` — Shares your local directory with the container.
+-  `rust:1.75` — The image to create a container from.
+-  `bash` — Run the next command in this terminal in the container. -->
+
+From here on, you'll work in the `your-application` directory. Install the dependencies for the web server with the code below.
 
 ```bash
-docker run --rm -v ./your-application:/app composer require vlucas/phpdotenv jerryhopper/oauth2-fusionauth
+cd your-application
+cargo init
+cargo add oauth2 actix-web@4
 ```
+
 
 ## Authentication
 
