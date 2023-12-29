@@ -1,7 +1,9 @@
+#![allow(unused_imports)] // todo remove
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder}; // web server
 use actix_files as fs; // static image files
 use handlebars::Handlebars; // html templates
 use std::collections::HashMap; // pass data to templates
+use dotenv::dotenv; // load .env file
 mod auth;
 
 #[get("/")]
@@ -28,6 +30,7 @@ async fn change(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    dotenv().ok();
     let handlebars_ref = setup_handlebars().await;
     HttpServer::new(move || {
         App::new()

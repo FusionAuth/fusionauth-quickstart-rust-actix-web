@@ -1,7 +1,5 @@
 use actix_web::{get, HttpResponse, Responder};
-use dotenv::dotenv;
 use std::env;
-
 use anyhow;
 use url::Url;
 use oauth2::{
@@ -26,51 +24,47 @@ async fn logout() -> impl Responder {
 
 #[get("/login")]
 async fn login() -> impl Responder {
-    dotenv().ok();
+    let client = get_oauth_client();
+    let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
+    let (auth_url, csrf_token) = client
+        .authorize_url(CsrfToken::new_random)
+        // .add_scope(Scope::new("read".to_string()))
+        // .add_scope(Scope::new("write".to_string()))
+        .add_scope(Scope::new("openid".to_string()))
+        .add_scope(Scope::new("email".to_string()))
+        .set_pkce_challenge(pkce_challenge)
+        .url();
+    // HttpResponse::Ok().body("login")
+    HttpResponse::Found().header("Location", auth_url.to_string()).finish()
+}
+
+#[get("/callback")]
+async fn callback() -> impl Responder {
     let c = env::var("FUSIONAUTH_CLIENT_ID").expect("FUSIONAUTH_CLIENT_ID not found");
     println!("{}", c);
     HttpResponse::Ok().body("login")
 }
 
-
-
-// Create an OAuth2 client by specifying the client ID, client secret, authorization URL and
-// token URL.
-let client =
+fn get_oauth_client() -> BasicClient {
     BasicClient::new(
-        ClientId::new("client_id".to_string()),
-        Some(ClientSecret::new("client_secret".to_string())),
-        AuthUrl::new("http://authorize".to_string())?,
-        Some(TokenUrl::new("http://token".to_string())?)
+        ClientId::new(env::var("FUSIONAUTH_CLIENT_ID").expect("Missing FUSIONAUTH_CLIENT_ID")),
+        Some(ClientSecret::new(env::var("FUSIONAUTH_CLIENT_SECRET").expect("Missing FUSIONAUTH_CLIENT_SECRET"))),
+        AuthUrl::new(env::var("FUSIONAUTH_BROWSER_URL").expect("Missing FUSIONAUTH_BROWSER_URL") + "/oauth2/authorize").expect("Invalid AuthUrl"),
+        Some(TokenUrl::new(env::var("FUSIONAUTH_SERVER_URL").expect("Missing FUSIONAUTH_SERVER_URL") + "/oauth2/token").expect("Invalid TokenUrl"))
     )
-    // Set the URL the user will be redirected to after the authorization process.
-    .set_redirect_uri(RedirectUrl::new("http://redirect".to_string())?);
+    .set_redirect_uri(RedirectUrl::new(env::var("FUSIONAUTH_REDIRECT_URL").expect("Missing FUSIONAUTH_REDIRECT_URL")).expect("Invalid RedirectUrl"))
+}
 
-// Generate a PKCE challenge.
-let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
-// Generate the full authorization URL.
-let (auth_url, csrf_token) = client
-    .authorize_url(CsrfToken::new_random)
-    // Set the desired scopes.
-    .add_scope(Scope::new("read".to_string()))
-    .add_scope(Scope::new("write".to_string()))
-    // Set the PKCE code challenge.
-    .set_pkce_challenge(pkce_challenge)
-    .url();
 
-// This is the URL you should redirect the user to, in order to trigger the authorization
-// process.
-println!("Browse to: {}", auth_url);
+// // Once the user has been redirected to the redirect URL, you'll have access to the
+// // authorization code. For security reasons, your code should verify that the `state`
+// // parameter returned by the server matches `csrf_state`.
 
-// Once the user has been redirected to the redirect URL, you'll have access to the
-// authorization code. For security reasons, your code should verify that the `state`
-// parameter returned by the server matches `csrf_state`.
-
-// Now you can trade it for an access token.
-let token_result = client
-    .exchange_code(AuthorizationCode::new("some authorization code".to_string()))
-    // Set the PKCE code verifier.
-    .set_pkce_verifier(pkce_verifier)
-    .request_async(async_http_client)
-    .await?;
+// // Now you can trade it for an access token.
+// let token_result = client
+//     .exchange_code(AuthorizationCode::new("some authorization code".to_string()))
+//     // Set the PKCE code verifier.
+//     .set_pkce_verifier(pkce_verifier)
+//     .request_async(async_http_client)
+//     .await?;
