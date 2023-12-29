@@ -138,24 +138,22 @@ From here on, you'll work in the `your-application` directory. Install the depen
 cd your-application
 cargo init
 cargo add oauth2 actix-web@4
+cargo build
 ```
 
+Add the following code to your `src/main.rs` file.
+
+<RemoteCode url={frontmatter.codeRoot + "/complete-application/your-application/src/main.rs"}/>
 
 ## Authentication
 
-Authentication in {frontmatter.language} is managed by [Jerry Hopper's FusionAuth Provider](https://github.com/jerryhopper/oauth2-fusionauth) for [The League's OAuth library](https://github.com/thephpleague/oauth2-client).
-
+Authentication in {frontmatter.language} is managed by [OAuth2](https://docs.rs/oauth2/latest/oauth2/).
 
 Make the file `your-application/.env` and insert the following lines.
 
 <RemoteCode url={frontmatter.codeRoot + "/complete-application/your-application/.env"}/>
 
 This tells {frontmatter.framework} where to find and connect to FusionAuth.
-
-<Aside type="note">
-  If you're not using Docker, you can change the server URL to match the browser URL, as all network communication will
-  be on your physical machine.
-</Aside>
 
 Authentication is handled by two files: `login.php` and `logout.php`.
 
