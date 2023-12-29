@@ -145,11 +145,11 @@ Add the following code to your `src/main.rs` file.
 
 <RemoteCode url={frontmatter.codeRoot + "/complete-application/your-application/src/main.rs"}/>
 
-```bash
-cargo run
-```
+
 
 ## Authentication
+
+Docs: https://docs.rs/oauth2/latest/oauth2/#example-asynchronous-api
 
 Authentication in {frontmatter.language} is managed by [OAuth2](https://docs.rs/oauth2/latest/oauth2/).
 
@@ -257,9 +257,13 @@ The HTML at the bottom of the file displays a blank form when the page first loa
 
 ## Run The Application
 
-The application is already being served by Apache in Docker.
+Run your application.
 
-Browse to the app at http://localhost:9012. Log in using `richard@example.com` and `password`. The change page allows you to enter a number.
+```bash
+cargo run
+```
+
+Browse to the app at http://localhost:9012. Log in using `richard@example.com` and `password`. The change page allows you to enter a number. If you don't log in, you won't be able to access the change or account pages.
 
 ## Next Steps
 

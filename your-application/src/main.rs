@@ -1,8 +1,8 @@
-use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
-use actix_files as fs;
-use handlebars::Handlebars;
-use std::collections::HashMap;
-mod login;
+use actix_web::{get, web, App, HttpResponse, HttpServer, Responder}; // web server
+use actix_files as fs; // static image files
+use handlebars::Handlebars; // html templates
+use std::collections::HashMap; // pass data to templates
+mod auth;
 
 #[get("/")]
 async fn index(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
@@ -18,9 +18,12 @@ async fn account(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
     HttpResponse::Ok().body(body)
 }
 
-#[get("/logout")]
-async fn logout() -> impl Responder {
-    HttpResponse::Ok().body("logout")
+#[get("/change")]
+async fn change(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
+    let mut data = HashMap::new();
+    data.insert("email", "todo@example.com");
+    let body = hb.render("change", &data).unwrap();
+    HttpResponse::Ok().body(body)
 }
 
 #[actix_web::main]
@@ -28,10 +31,11 @@ async fn main() -> std::io::Result<()> {
     let handlebars_ref = setup_handlebars().await;
     HttpServer::new(move || {
         App::new()
-            .service(login::login)
-            .service(logout)
-            .service(index)
             .service(account)
+            .service(change)
+            .service(index)
+            .service(auth::login)
+            .service(auth::logout)
             .service(fs::Files::new("/static", "static").show_files_listing())
             .app_data(handlebars_ref.clone())
     })
