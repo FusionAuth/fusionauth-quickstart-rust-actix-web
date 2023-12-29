@@ -31,9 +31,9 @@ For this quickstart, you'll need:
 
 * [Docker](https://www.docker.com) version 20 or later, which is the quickest way to start FusionAuth. (There are [other ways](/docs/v1/tech/installation-guide/).)
 
-You will run PHP 8, Composer, and Apache in Docker. Using Docker makes this tutorial suitable for Windows, Linux, and macOS.
+You will run Rust in Docker. Using Docker makes this tutorial suitable for Windows, Linux, and macOS.
 
-If you are experienced in PHP, you can install PHP 8, Composer, and Apache on your host machine instead and convert commands to work on your operating system.
+If you already have Rust installed locally, you can follow this tutorial on your host machine instead and convert commands to work on your operating system.
 
 ## General Architecture
 
@@ -51,7 +51,7 @@ In general, you would introduce FusionAuth to normalize and consolidate user dat
 
 ## Getting Started
 
-Start with getting FusionAuth up and running and creating a new {frontmatter.technology} application.
+Start with getting FusionAuth up and running and creating a new {frontmatter.framework} application.
 
 ### Clone The Code
 
@@ -77,7 +77,7 @@ Assuming you have Docker installed, you can start FusionAuth on your machine wit
 docker compose up
 ```
 
-This will start four containers, one each for FusionAuth, Postgres, OpenSearch, and PHP.
+This will start four containers, one each for FusionAuth, Postgres, OpenSearch, and Rust.
 
 Here you are using a bootstrapping feature of FusionAuth called [Kickstart](/docs/v1/tech/installation-guide/kickstart). When FusionAuth starts for the first time, it will look at the `kickstart/kickstart.json` file and configure FusionAuth to your specified state.
 
@@ -101,9 +101,9 @@ You can log in to the [FusionAuth admin UI](http://localhost:9011/admin) and loo
   `.gitignore` file and never commit secrets to version control.
 </Aside>
 
-### The Basic {frontmatter.technology} Application
+### The Basic {frontmatter.framework} Application
 
-While this guide builds a new {frontmatter.technology} project, you can use the same method to integrate your existing project with FusionAuth.
+While this guide builds a new {frontmatter.framework} project, you can use the same method to integrate your existing project with FusionAuth.
 
 <Aside type="note">
   Note that the `phpimage.Dockerfile` in the root directory of the project configures Apache to serve files from the `public` directory over the web, to hide `vendor` and configuration files. If you're not using Docker, you will need to do this yourself.
@@ -135,14 +135,14 @@ docker run --rm -v ./your-application:/app composer require vlucas/phpdotenv jer
 
 ## Authentication
 
-Authentication in {frontmatter.technology} is managed by [Jerry Hopper's FusionAuth Provider](https://github.com/jerryhopper/oauth2-fusionauth) for [The League's OAuth library](https://github.com/thephpleague/oauth2-client).
+Authentication in {frontmatter.language} is managed by [Jerry Hopper's FusionAuth Provider](https://github.com/jerryhopper/oauth2-fusionauth) for [The League's OAuth library](https://github.com/thephpleague/oauth2-client).
 
 
 Make the file `your-application/.env` and insert the following lines.
 
 <RemoteCode url={frontmatter.codeRoot + "/complete-application/your-application/.env"}/>
 
-This tells {frontmatter.technology} where to find and connect to FusionAuth.
+This tells {frontmatter.framework} where to find and connect to FusionAuth.
 
 <Aside type="note">
   If you're not using Docker, you can change the server URL to match the browser URL, as all network communication will
@@ -274,7 +274,7 @@ FusionAuth gives you the ability to customize just about everything to do with t
 * Set up [MFA](/docs/v1/tech/guides/multi-factor-authentication), [Social login](/docs/v1/tech/identity-providers/), or [SAML](/docs/v1/tech/identity-providers/samlv2/) integrations.
 * Integrate with external systems using [Webhooks](/docs/v1/tech/events-webhooks/), [SCIM](/docs/v1/tech/core-concepts/scim), and [Lambdas](/docs/v1/tech/lambdas/).
 
-### {frontmatter.technology} Authentication
+### {frontmatter.language} Authentication
 
 - [The League OAuth overview](https://oauth2-client.thephpleague.com/usage/)
 - [Jerry Hopper's FusionAuth provider](https://github.com/jerryhopper/oauth2-fusionauth)
@@ -285,7 +285,7 @@ FusionAuth gives you the ability to customize just about everything to do with t
 
 Ensure FusionAuth is running in the Docker container. You should be able to log in as the admin user `admin@example.com` with the password `password` at [http://localhost:9011/admin](http://localhost:9011/admin).
 
-- {frontmatter.technology} says there is an invalid state exception.
+- {frontmatter.framework} says there is an invalid state exception.
 
 Browse to the home page, log out, and try to log in again. If that still doesn't work, delete and restart all the containers.
 
