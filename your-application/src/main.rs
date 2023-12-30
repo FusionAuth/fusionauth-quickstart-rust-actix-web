@@ -56,8 +56,10 @@ async fn account(hb: web::Data<Handlebars<'_>>, session: Session) -> HttpRespons
     HttpResponse::Ok().body(body)
 }
 
+// todo crsf
+
 #[route("/change", method="GET", method="POST")]
-async fn change(req: HttpRequest, hb: web::Data<Handlebars<'_>>, session: Session) -> HttpResponse {
+async fn change(req: HttpRequest, hb: web::Data<Handlebars<'_>>, session: Session, form: web::Form<HashMap<String, String>>) -> HttpResponse {
     if let Ok(None) | Err(_) = session.get::<String>("email") {
         return HttpResponse::Found().append_header(("Location", "/")).finish();
     }
@@ -68,6 +70,11 @@ async fn change(req: HttpRequest, hb: web::Data<Handlebars<'_>>, session: Sessio
     }
     else if req.method() == http::Method::POST {
         data.insert("is_get_request", "false".to_string());
+        if let Some(amount) = form.get("amount") {
+            calculate_change(amount, &mut data);
+        } else {
+            data.insert("is_error", "true".to_string());
+        }
     }
     else {
         return HttpResponse::BadRequest().finish();
@@ -76,13 +83,16 @@ async fn change(req: HttpRequest, hb: web::Data<Handlebars<'_>>, session: Sessio
     HttpResponse::Ok().body(body)
 }
 
-// todo crsf
-
-fn calculate_change(amount: &str) -> Result<HashMap<&'static str, String>, &'static str> {
-    let total = amount.parse::<f64>().map_err(|_| "Invalid input")?;
+fn calculate_change(amount: &str, state: &mut HashMap::<&str, String>) -> () {
+    let total = match amount.parse::<f64>() {
+        Ok(t) => t,
+        Err(_) => {
+            state.insert("iserror", "true".to_string());
+            return;
+        }
+    };
     let rounded_total = (total * 100.0).floor() / 100.0;
 
-    let mut state = HashMap::new();
     state.insert("iserror", (!amount.chars().all(char::is_numeric)).to_string());
     state.insert("hasChange", "true".to_string());
     state.insert("total", format!("{:.2}", rounded_total));
@@ -92,7 +102,5 @@ fn calculate_change(amount: &str) -> Result<HashMap<&'static str, String>, &'sta
 
     let pennies = ((rounded_total - (0.05 * nickels)) / 0.01).ceil();
     state.insert("pennies", format!("{}", pennies));
-
-    Ok(state)
 }
 
