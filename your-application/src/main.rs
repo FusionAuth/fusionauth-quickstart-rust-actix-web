@@ -1,4 +1,4 @@
-use actix_web::{get, route, web, http, App, HttpRequest, HttpResponse, HttpServer}; // web server
+use actix_web::{get, post, web, App, HttpResponse, HttpServer}; // web server
 use actix_files as fs; // static image files
 use actix_session::{Session, SessionMiddleware, storage::CookieSessionStore}; // store auth info in browser cookies
 use actix_web::cookie::Key;
@@ -15,7 +15,9 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(SessionMiddleware::new(CookieSessionStore::default(), Key::generate().clone()))
             .service(account)
-            .service(change)
+            // .service(change)
+            .service(change_get)
+            .service(change_post)
             .service(index)
             .service(auth::login)
             .service(auth::logout)
@@ -58,28 +60,33 @@ async fn account(hb: web::Data<Handlebars<'_>>, session: Session) -> HttpRespons
 
 // todo crsf
 
-#[route("/change", method="GET", method="POST")]
-async fn change(req: HttpRequest, hb: web::Data<Handlebars<'_>>, session: Session, form: web::Form<HashMap<String, String>>) -> HttpResponse {
+#[get("/change")]
+async fn change_get(hb: web::Data<Handlebars<'_>>, session: Session) -> HttpResponse {
     if let Ok(None) | Err(_) = session.get::<String>("email") {
         return HttpResponse::Found().append_header(("Location", "/")).finish();
     }
     let mut data = HashMap::<&str, String>::new();
     data.insert("email", session.get::<String>("email").unwrap().unwrap());
-    if req.method() == http::Method::GET {
-        data.insert("is_get_request", "true".to_string());
+    data.insert("isGetRequest", "true".to_string());
+    let body = hb.render("change", &data).unwrap();
+    HttpResponse::Ok().body(body)
+}
+
+#[post("/change")]
+async fn change_post(hb: web::Data<Handlebars<'_>>, session: Session, form: web::Form<HashMap<String, String>>) -> HttpResponse {
+    if let Ok(None) | Err(_) = session.get::<String>("email") {
+        return HttpResponse::Found().append_header(("Location", "/")).finish();
     }
-    else if req.method() == http::Method::POST {
-        data.insert("is_get_request", "false".to_string());
-        if let Some(amount) = form.get("amount") {
-            calculate_change(amount, &mut data);
-        } else {
-            data.insert("is_error", "true".to_string());
-        }
-    }
-    else {
-        return HttpResponse::BadRequest().finish();
+    let mut data = HashMap::<&str, String>::new();
+    data.insert("email", session.get::<String>("email").unwrap().unwrap());
+    data.insert("isGetRequest", "false".to_string());
+    if let Some(amount) = form.get("amount") {
+        calculate_change(amount, &mut data);
+    } else {
+        data.insert("isError", "true".to_string());
     }
     let body = hb.render("change", &data).unwrap();
+    // println!("{:?}", &data);
     HttpResponse::Ok().body(body)
 }
 
@@ -87,14 +94,13 @@ fn calculate_change(amount: &str, state: &mut HashMap::<&str, String>) -> () {
     let total = match amount.parse::<f64>() {
         Ok(t) => t,
         Err(_) => {
-            state.insert("iserror", "true".to_string());
+            state.insert("isError", "true".to_string());
             return;
         }
     };
     let rounded_total = (total * 100.0).floor() / 100.0;
 
-    state.insert("iserror", (!amount.chars().all(char::is_numeric)).to_string());
-    state.insert("hasChange", "true".to_string());
+    // state.insert("isError", (!amount.chars().all(char::is_numeric)).to_string());
     state.insert("total", format!("{:.2}", rounded_total));
 
     let nickels = (rounded_total / 0.05).floor();
@@ -103,4 +109,3 @@ fn calculate_change(amount: &str, state: &mut HashMap::<&str, String>) -> () {
     let pennies = ((rounded_total - (0.05 * nickels)) / 0.01).ceil();
     state.insert("pennies", format!("{}", pennies));
 }
-

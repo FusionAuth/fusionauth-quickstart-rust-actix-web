@@ -30,7 +30,7 @@
 
 
 <!-- GET REQUEST ------------------------------------------------>
-          {{#if is_get_request}}
+          {{#if (eq isGetRequest "true")}}
             <div class="change-message">Please enter a dollar amount:</div>
             <form method="post" action="change">
               <input type="hidden" name="csrftoken" value="{{csrftoken}}" />
@@ -42,7 +42,7 @@
             </form>
 <!-- POST REQUEST ----------------------------------------------->
           {{else}}
-            {{#if is_error}}
+          {{#if (eq isError "true")}}
               <div class="error-message">Please enter a dollar amount:</div>
             {{else}}
               <div class="change-message">
