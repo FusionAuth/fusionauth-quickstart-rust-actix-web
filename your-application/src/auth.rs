@@ -69,7 +69,7 @@ async fn callback(params: web::Query<AuthCallbackParams>, session: Session) ->  
     // get email
     let client = reqwest::Client::new();
     let user_info_response = match client
-        .get(format!("{}/oauth2/userinfo", env::var("FUSIONAUTH_SERVER_URL").expect("Missing FUSIONAUTH_SERVER_URL")))
+        .get(format!("{}/oauth2/userinfo", env::var("FUSIONAUTH_URL").expect("Missing FUSIONAUTH_URL")))
         .bearer_auth(token_result.access_token().secret())
         .send()
         .await {
@@ -100,8 +100,8 @@ fn get_oauth_client() -> BasicClient {
     BasicClient::new(
         ClientId::new(env::var("FUSIONAUTH_CLIENT_ID").expect("Missing FUSIONAUTH_CLIENT_ID")),
         Some(ClientSecret::new(env::var("FUSIONAUTH_CLIENT_SECRET").expect("Missing FUSIONAUTH_CLIENT_SECRET"))),
-        AuthUrl::new(env::var("FUSIONAUTH_BROWSER_URL").expect("Missing FUSIONAUTH_BROWSER_URL") + "/oauth2/authorize").expect("Invalid AuthUrl"),
-        Some(TokenUrl::new(env::var("FUSIONAUTH_SERVER_URL").expect("Missing FUSIONAUTH_SERVER_URL") + "/oauth2/token").expect("Invalid TokenUrl"))
+        AuthUrl::new(env::var("FUSIONAUTH_URL").expect("Missing FUSIONAUTH_URL") + "/oauth2/authorize").expect("Invalid AuthUrl"),
+        Some(TokenUrl::new(env::var("FUSIONAUTH_URL").expect("Missing FUSIONAUTH_URL") + "/oauth2/token").expect("Invalid TokenUrl"))
     )
     .set_redirect_uri(RedirectUrl::new(env::var("FUSIONAUTH_REDIRECT_URL").expect("Missing FUSIONAUTH_REDIRECT_URL")).expect("Invalid RedirectUrl"))
 }
