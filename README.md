@@ -1,11 +1,11 @@
-# Quickstart: PHP app with FusionAuth
+# Quickstart: Rust Actix app with FusionAuth
 
-This repo holds an example PHP application that uses FusionAuth as the identity provider.
+This repo holds an example Rust application that uses FusionAuth as the identity provider.
 
-This repository is documented at https://fusionauth.io/docs/quickstarts/quickstart-php-web.
+This repository is documented at https://fusionauth.io/docs/quickstarts/quickstart-rust-actix-web.
 
 Further reading:
-- [PHP OAuth provider](https://github.com/jerryhopper/oauth2-fusionauth)
+- [Rust OAuth provider](https://docs.rs/oauth2/latest/oauth2/)
 - [FusionAuth OAuth Docs](https://fusionauth.io/docs/v1/tech/oauth/endpoints)
 
 ## Project Contents
@@ -16,20 +16,19 @@ The `complete-application` directory contains a fully working version of the app
 
 ## Prerequisites
 
-- [PHP](https://www.php.net/downloads.php) 8+
-- [Composer](https://getcomposer.org/)
+- [Rust](https://rustup.rs/#)
 - [Docker](https://www.docker.com) version 20 or later.
 
 ## Running FusionAuth
 
-To run FusionAuth, just stand up the docker containers using docker-compose. 
+To run FusionAuth, just stand up the docker containers using docker-compose.
 
 First clone the example repo and change into the project directory:
 
 ```shell
-git clone https://github.com/FusionAuth/fusionauth-quickstart-php-web.git
-cd fusionauth-quickstart-php-web/complete-application
-composer install
+git clone https://github.com/FusionAuth/fusionauth-quickstart-rust-actix-web.git
+cd fusionauth-quickstart-rust-actix--web
+cargo install
 ```
 
 Start the containers with docker compose.
@@ -38,7 +37,7 @@ Start the containers with docker compose.
 docker compose up
 ```
 
-This will start a PHP container, PostgreSQL, Opensearch and the FusionAuth server.
+This will start PostgreSQL, Opensearch and the FusionAuth server.
 
 FusionAuth will initially be configured with these settings:
 
@@ -52,19 +51,13 @@ You can log into the [FusionAuth admin UI](http://localhost:9011/admin) and look
 
 ## Running the Example Application
 
-If you followed the steps above the PHP application container will already be running and you can access it at http://localhost:9012 else go into the complete project directory
+Run the Rust application with:
 
 ```shell
 cd complete-application
-composer install
-```
-
-Start up the application docker containers with the following
-
-```shell
-docker compose up
+cargo run
 ```
 
 Browse to the app at http://localhost:9012 and login with `richard@example.com` and `password`.
 
-Follow the tutorial at https://fusionauth.io/docs/quickstarts/quickstart-php-web to learn how to configure PHP to work with FusionAuth.
+Follow the tutorial at https://fusionauth.io/docs/quickstarts/quickstart-rust-actix-web to learn how to configure Rust to work with FusionAuth.

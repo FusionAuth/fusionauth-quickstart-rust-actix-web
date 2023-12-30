@@ -87,19 +87,3 @@ services:
       - ./kickstart:/usr/local/fusionauth/kickstart
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
-## Rust ####################
-  # rust:
-  #   image: rust:1.75
-  #   container_name: rustbox
-  #   #build:
-  #   #  context: .
-  #   #  dockerfile: rust:1.75 # rustimage.Dockerfile
-  #   ports:
-  #     - 9012:80
-  #   volumes:
-  #     - ./your-application:/app # TODO
-  #   depends_on:
-  #     - fusionauth
-  #   networks:
-  #     - db_net

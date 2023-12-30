@@ -13,7 +13,7 @@ async fn main() -> std::io::Result<()> {
     let handlebars_ref = setup_handlebars().await;
     HttpServer::new(move || {
         App::new()
-            .wrap(SessionMiddleware::builder(CookieSessionStore::default(), Key::generate()) // https://github.com/actix/actix-web/issues/147
+            .wrap(SessionMiddleware::builder(CookieSessionStore::default(), Key::generate())
                     .cookie_content_security(CookieContentSecurity::Private)
                     .cookie_same_site(SameSite::Lax)
                     .build())
