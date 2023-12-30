@@ -31,12 +31,6 @@ For this quickstart, you'll need:
 
 * [Docker](https://www.docker.com) version 20 or later, which is the quickest way to start FusionAuth. (There are [other ways](/docs/v1/tech/installation-guide/).)
 * [{frontmatter.language}](https://rustup.rs/#) and Cargo version 1.7 or later.
-<!-- sudo apt install rustc cargo -->
-
-
-<!-- You will run Rust in Docker. Using Docker makes this tutorial suitable for Windows, Linux, and macOS. -->
-
-<!-- If you already have Rust installed locally, you can follow this tutorial on your host machine instead and convert commands to work on your operating system. -->
 
 ## General Architecture
 
