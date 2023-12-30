@@ -82,7 +82,8 @@ async fn change_post(hb: web::Data<Handlebars<'_>>, session: Session, form: web:
     data.insert("isGetRequest", "false".to_string());
     if let Some(amount) = form.get("amount") {
         calculate_change(amount, &mut data);
-    } else {
+    }
+    else {
         data.insert("isError", "true".to_string());
     }
     let body = hb.render("change", &data).unwrap();
@@ -100,12 +101,12 @@ fn calculate_change(amount: &str, state: &mut HashMap::<&str, String>) -> () {
     };
     let rounded_total = (total * 100.0).floor() / 100.0;
 
-    // state.insert("isError", (!amount.chars().all(char::is_numeric)).to_string());
+    state.insert("isError", (!amount.chars().all(|c| c.is_digit(10) || c == '.')).to_string());
     state.insert("total", format!("{:.2}", rounded_total));
 
-    let nickels = (rounded_total / 0.05).floor();
+    let nickels = (rounded_total / 0.05).floor().abs();
     state.insert("nickels", format!("{}", nickels));
 
-    let pennies = ((rounded_total - (0.05 * nickels)) / 0.01).ceil();
+    let pennies = ((rounded_total - (0.05 * nickels)) / 0.01).round().abs();
     state.insert("pennies", format!("{}", pennies));
 }
