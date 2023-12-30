@@ -1,7 +1,7 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer}; // web server
 use actix_files as fs; // static image files
-use actix_session::{Session, SessionMiddleware, storage::CookieSessionStore}; // store auth info in browser cookies
-use actix_web::cookie::Key;
+use actix_session::{Session, SessionMiddleware, storage::CookieSessionStore, config::CookieContentSecurity}; // store auth info in browser cookies
+use actix_web::cookie::{Key, SameSite};
 use handlebars::Handlebars; // html templates
 use std::collections::HashMap; // pass data to templates
 use dotenv::dotenv; // load .env file
@@ -13,7 +13,10 @@ async fn main() -> std::io::Result<()> {
     let handlebars_ref = setup_handlebars().await;
     HttpServer::new(move || {
         App::new()
-            .wrap(SessionMiddleware::new(CookieSessionStore::default(), Key::generate().clone()))
+            .wrap(SessionMiddleware::builder(CookieSessionStore::default(), Key::generate()) // https://github.com/actix/actix-web/issues/147
+                    .cookie_content_security(CookieContentSecurity::Private)
+                    .cookie_same_site(SameSite::Lax)
+                    .build())
             .service(account)
             // .service(change)
             .service(change_get)
