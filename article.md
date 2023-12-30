@@ -30,7 +30,7 @@ Find the Docker Compose file and source code for the complete application at <a 
 For this quickstart, you'll need:
 
 * [Docker](https://www.docker.com) version 20 or later, which is the quickest way to start FusionAuth. (There are [other ways](/docs/v1/tech/installation-guide/).)
-* {frontmatter.language}.
+* {frontmatter.language} and Cargo version 1.7 or later.
 <!-- sudo apt install rustc cargo -->
 
 
