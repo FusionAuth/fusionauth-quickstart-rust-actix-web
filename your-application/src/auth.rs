@@ -37,7 +37,6 @@ async fn login(session: Session) -> impl Responder {
         .url();
     session.insert("csrf_token",    csrf_token);
     session.insert("pkce_verifier", pkce_verifier);
-    // HttpResponse::Found().header("Location", auth_url.to_string()).finish()
     HttpResponse::Found().append_header(("Location", auth_url.to_string())).finish()
 }
 
@@ -67,9 +66,11 @@ async fn callback(params: web::Query<AuthCallbackParams>, session: Session) ->  
         .await {
             Ok(result) => result,
             Err(e) => {
+                println!("{:#?}", e);
                 return Ok(HttpResponse::InternalServerError().body("Error during token exchange"));
             }
         };
+    println!("{:#?}", token_result);
     // session.insert("email", token_result.email.to_string().unwrap());
     Ok(HttpResponse::Found().append_header(("Location", "/account")).finish())
 }
