@@ -18,7 +18,6 @@ async fn main() -> std::io::Result<()> {
                     .cookie_same_site(SameSite::Lax)
                     .build())
             .service(account)
-            // .service(change)
             .service(change_get)
             .service(change_post)
             .service(index)
@@ -61,8 +60,6 @@ async fn account(hb: web::Data<Handlebars<'_>>, session: Session) -> HttpRespons
     HttpResponse::Ok().body(body)
 }
 
-// todo crsf
-
 #[get("/change")]
 async fn change_get(hb: web::Data<Handlebars<'_>>, session: Session) -> HttpResponse {
     if let Ok(None) | Err(_) = session.get::<String>("email") {
@@ -90,7 +87,6 @@ async fn change_post(hb: web::Data<Handlebars<'_>>, session: Session, form: web:
         data.insert("isError", "true".to_string());
     }
     let body = hb.render("change", &data).unwrap();
-    // println!("{:?}", &data);
     HttpResponse::Ok().body(body)
 }
 

@@ -1,8 +1,6 @@
 use actix_web::{get, web, Error, HttpResponse, Responder};
 use actix_session::{Session};
 use std::env;
-// use anyhow;
-// use url::Url;
 use oauth2::{
     AuthorizationCode,
     AuthUrl,
@@ -18,8 +16,7 @@ use oauth2::{
 };
 use oauth2::basic::BasicClient;
 use oauth2::reqwest::async_http_client;
-// use oauth2::reqwest::http_client;
-use reqwest; // todo remove
+use reqwest;
 use serde::Deserialize;
 
 #[get("/logout")]
@@ -40,17 +37,6 @@ async fn login(session: Session) -> impl Responder {
     let _ = session.insert("csrf_token", csrf_token);
     let _ = session.insert("pkce_verifier", pkce_verifier);
     HttpResponse::Found().append_header(("Location", auth_url.to_string())).finish()
-}
-
-#[derive(Deserialize)]
-struct AuthCallbackParams {
-    state: String,
-    code: String,
-}
-
-#[derive(Deserialize)]
-struct UserInfo {
-    email: String,
 }
 
 #[get("/callback")]
@@ -118,4 +104,15 @@ fn get_oauth_client() -> BasicClient {
         Some(TokenUrl::new(env::var("FUSIONAUTH_SERVER_URL").expect("Missing FUSIONAUTH_SERVER_URL") + "/oauth2/token").expect("Invalid TokenUrl"))
     )
     .set_redirect_uri(RedirectUrl::new(env::var("FUSIONAUTH_REDIRECT_URL").expect("Missing FUSIONAUTH_REDIRECT_URL")).expect("Invalid RedirectUrl"))
+}
+
+#[derive(Deserialize)]
+struct AuthCallbackParams {
+    state: String,
+    code: String,
+}
+
+#[derive(Deserialize)]
+struct UserInfo {
+    email: String,
 }
