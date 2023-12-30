@@ -37,11 +37,15 @@ async fn setup_handlebars() -> web::Data<Handlebars<'static>> {
     web::Data::new(handlebars)
 }
 
-#[get("/")]
-async fn index(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
-    let body = hb.render("index", &{}).unwrap();
-    HttpResponse::Ok().body(body)
-}
+    #[get("/")]
+    async fn index(hb: web::Data<Handlebars<'_>>, session: Session) -> HttpResponse {
+        if session.get::<String>("email").unwrap_or(None).is_some() {
+            HttpResponse::Found().append_header(("Location", "/account")).finish()
+        } else {
+            let body = hb.render("index", &{}).unwrap();
+            HttpResponse::Ok().body(body)
+        }
+    }
 
 #[get("/account")]
 async fn account(hb: web::Data<Handlebars<'_>>, session: Session) -> HttpResponse {

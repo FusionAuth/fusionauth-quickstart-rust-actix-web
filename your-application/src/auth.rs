@@ -33,7 +33,6 @@ async fn login(session: Session) -> impl Responder {
     let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
     let (auth_url, csrf_token) = get_oauth_client()
         .authorize_url(CsrfToken::new_random)
-        .add_scope(Scope::new("read".to_string()))
         .add_scope(Scope::new("openid".to_string()))
         .add_scope(Scope::new("email".to_string()))
         .set_pkce_challenge(pkce_challenge)
@@ -80,7 +79,6 @@ async fn callback(params: web::Query<AuthCallbackParams>, session: Session) ->  
                 return Ok(HttpResponse::InternalServerError().body("Error during token exchange"));
             }
         };
-    println!("{:#?}", token_result);
 
     // get email
     let client = reqwest::Client::new();
