@@ -19,11 +19,13 @@ use oauth2::{
 use oauth2::basic::BasicClient;
 use oauth2::reqwest::async_http_client;
 // use oauth2::reqwest::http_client;
+use reqwest; // todo remove
 use serde::Deserialize;
 
 #[get("/logout")]
-async fn logout() -> impl Responder {
-    HttpResponse::Ok().body("logout")
+async fn logout(session: Session) -> impl Responder {
+    let _ = session.remove("email");
+    HttpResponse::Found().append_header(("Location", "/")).finish()
 }
 
 #[get("/login")]
@@ -31,12 +33,13 @@ async fn login(session: Session) -> impl Responder {
     let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
     let (auth_url, csrf_token) = get_oauth_client()
         .authorize_url(CsrfToken::new_random)
+        .add_scope(Scope::new("read".to_string()))
         .add_scope(Scope::new("openid".to_string()))
         .add_scope(Scope::new("email".to_string()))
         .set_pkce_challenge(pkce_challenge)
         .url();
-    session.insert("csrf_token",    csrf_token);
-    session.insert("pkce_verifier", pkce_verifier);
+    let _ = session.insert("csrf_token", csrf_token);
+    let _ = session.insert("pkce_verifier", pkce_verifier);
     HttpResponse::Found().append_header(("Location", auth_url.to_string())).finish()
 }
 
@@ -46,9 +49,14 @@ struct AuthCallbackParams {
     code: String,
 }
 
+#[derive(Deserialize)]
+struct UserInfo {
+    email: String,
+}
+
 #[get("/callback")]
 async fn callback(params: web::Query<AuthCallbackParams>, session: Session) ->  Result<HttpResponse, Error> {
-    //callback url from fusionauth: http://localhost:9012/callback?code=4u73uE6d-xbJ5lTBeY2z7cCXMWMEYP_TSB7v_vOdJp4&locale=en&state=XPNMGQfsHPKNP7PK7qyJyg&userState=Authenticated
+    // confirm pkce match
     let received_state = &params.state;
     if let Ok(saved_state) = session.get::<String>("csrf_token") {
         if saved_state != Some(received_state.clone()) {
@@ -58,6 +66,8 @@ async fn callback(params: web::Query<AuthCallbackParams>, session: Session) ->  
     else {
         return Ok(HttpResponse::InternalServerError().body("Session error"));
     }
+
+    // get access token
     let pkce_verifier = session.get::<String>("pkce_verifier").unwrap().unwrap();
     let token_result = match get_oauth_client()
         .exchange_code(AuthorizationCode::new(params.code.clone()))
@@ -71,7 +81,34 @@ async fn callback(params: web::Query<AuthCallbackParams>, session: Session) ->  
             }
         };
     println!("{:#?}", token_result);
-    // session.insert("email", token_result.email.to_string().unwrap());
+
+    // get email
+    let client = reqwest::Client::new();
+    let user_info_response = match client
+        .get(format!("{}/oauth2/userinfo", env::var("FUSIONAUTH_SERVER_URL").expect("Missing FUSIONAUTH_SERVER_URL")))
+        .bearer_auth(token_result.access_token().secret())
+        .send()
+        .await {
+            Ok(result) => result,
+            Err(e) => {
+                println!("{:#?}", e);
+                return Ok(HttpResponse::InternalServerError().body("Error during get email"));
+            }
+        };
+    if user_info_response.status().is_success() {
+        let user_info = match user_info_response.json::<UserInfo>().await {
+            Ok(result) => result,
+            Err(e) => {
+                println!("{:#?}", e);
+                return Ok(HttpResponse::InternalServerError().body("Error during get email2"));
+            }
+        };
+        let _ = session.insert("email", user_info.email.clone());
+    }
+    else {
+        println!("{:#?}", user_info_response.error_for_status().unwrap_err());
+        return Ok(HttpResponse::InternalServerError().body("Error during get email3"));
+    }
     Ok(HttpResponse::Found().append_header(("Location", "/account")).finish())
 }
 

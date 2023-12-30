@@ -8,37 +8,13 @@ use std::collections::HashMap; // pass data to templates
 use dotenv::dotenv; // load .env file
 mod auth;
 
-#[get("/")]
-async fn index(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
-    let body = hb.render("index", &{}).unwrap();
-    HttpResponse::Ok().body(body)
-}
-
-#[get("/account")]
-async fn account(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
-    let mut data = HashMap::new();
-    data.insert("email", "todo@example.com");
-    let body = hb.render("account", &data).unwrap();
-    HttpResponse::Ok().body(body)
-}
-
-#[get("/change")]
-async fn change(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
-    let mut data = HashMap::new();
-    data.insert("email", "todo@example.com");
-    let body = hb.render("change", &data).unwrap();
-    HttpResponse::Ok().body(body)
-}
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
-    let secret_key = Key::generate();
     let handlebars_ref = setup_handlebars().await;
     HttpServer::new(move || {
         App::new()
-            .wrap(SessionMiddleware::new(CookieSessionStore::default(), secret_key.clone()))
-            // .wrap(CookieSession::signed(get_session_key()).secure(false)) // change secure to true (https) in production
+            .wrap(SessionMiddleware::new(CookieSessionStore::default(), Key::generate().clone()))
             .service(account)
             .service(change)
             .service(index)
@@ -53,13 +29,6 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
-// fn get_session_key() -> [u8; 32] {
-//     let bytes = "a-secret-session-key-no-one-can-guess".as_bytes(); // change this in production
-//     let mut key_bytes = [0u8; 32];
-//     key_bytes[..bytes.len()].copy_from_slice(&bytes[..bytes.len().min(32)]);
-//     key_bytes
-// }
-
 async fn setup_handlebars() -> web::Data<Handlebars<'static>> {
     let mut handlebars = Handlebars::new();
     handlebars
@@ -67,3 +36,31 @@ async fn setup_handlebars() -> web::Data<Handlebars<'static>> {
         .unwrap();
     web::Data::new(handlebars)
 }
+
+#[get("/")]
+async fn index(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
+    let body = hb.render("index", &{}).unwrap();
+    HttpResponse::Ok().body(body)
+}
+
+#[get("/account")]
+async fn account(hb: web::Data<Handlebars<'_>>, session: Session) -> HttpResponse {
+    if let Ok(Some(email)) = session.get::<String>("email") {
+        let mut data = HashMap::new();
+        data.insert("email", email);
+        let body = hb.render("account", &data).unwrap();
+        HttpResponse::Ok().body(body)
+    }
+    else {
+        HttpResponse::Found().append_header(("Location", "/")).finish()
+    }
+}
+
+#[get("/change")]
+async fn change(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
+    let mut data = HashMap::new();
+    data.insert("email", "todo@example.com");
+    let body = hb.render("change", &data).unwrap();
+    HttpResponse::Ok().body(body)
+}
+
