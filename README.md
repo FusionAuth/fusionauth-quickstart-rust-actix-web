@@ -28,7 +28,6 @@ First clone the example repo and change into the project directory:
 ```shell
 git clone https://github.com/FusionAuth/fusionauth-quickstart-rust-actix-web.git
 cd fusionauth-quickstart-rust-actix--web
-cargo install
 ```
 
 Start the containers with docker compose.
@@ -37,7 +36,7 @@ Start the containers with docker compose.
 docker compose up
 ```
 
-This will start PostgreSQL, Opensearch and the FusionAuth server.
+This will start three containers for PostgreSQL, Opensearch and FusionAuth.
 
 FusionAuth will initially be configured with these settings:
 
@@ -47,7 +46,7 @@ FusionAuth will initially be configured with these settings:
 * Your admin username is `admin@example.com` and your password is `password`.
 * Your fusionAuthBaseUrl is 'http://localhost:9011/'
 
-You can log into the [FusionAuth admin UI](http://localhost:9011/admin) and look around if you want, but with Docker/Kickstart you don't need to.
+You can log into the [FusionAuth admin UI](http://localhost:9011/admin) and look around if you want, but with Docker and Kickstart everything will already be configured correctly.
 
 ## Running the Example Application
 

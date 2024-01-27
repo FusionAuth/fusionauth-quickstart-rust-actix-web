@@ -11,9 +11,10 @@ mod auth;
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
     let handlebars_ref = setup_handlebars().await;
+    let key = Key::generate();
     HttpServer::new(move || {
         App::new()
-            .wrap(SessionMiddleware::builder(CookieSessionStore::default(), Key::generate())
+            .wrap(SessionMiddleware::builder(CookieSessionStore::default(), key.clone())
                     .cookie_content_security(CookieContentSecurity::Private)
                     .cookie_same_site(SameSite::Lax)
                     .build())
