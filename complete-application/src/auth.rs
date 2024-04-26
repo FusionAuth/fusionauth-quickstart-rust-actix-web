@@ -32,6 +32,7 @@ async fn login(session: Session) -> impl Responder {
         .authorize_url(CsrfToken::new_random)
         .add_scope(Scope::new("openid".to_string()))
         .add_scope(Scope::new("email".to_string()))
+        .add_scope(Scope::new("profile".to_string()))
         .set_pkce_challenge(pkce_challenge)
         .url();
     let _ = session.insert("csrf_token", csrf_token);
