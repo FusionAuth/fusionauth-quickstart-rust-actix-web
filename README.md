@@ -27,7 +27,7 @@ First clone the example repo and change into the project directory:
 
 ```shell
 git clone https://github.com/FusionAuth/fusionauth-quickstart-rust-actix-web.git
-cd fusionauth-quickstart-rust-actix--web
+cd fusionauth-quickstart-rust-actix-web
 ```
 
 Start the containers with docker compose.
