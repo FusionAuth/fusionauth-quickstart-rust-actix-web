@@ -110,3 +110,4 @@ fn calculate_change(amount: &str, state: &mut HashMap::<&str, String>) -> () {
     let pennies = ((rounded_total - (0.05 * nickels)) / 0.01).round().abs();
     state.insert("pennies", format!("{}", pennies));
 }
+:

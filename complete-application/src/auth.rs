@@ -62,7 +62,6 @@ async fn callback(params: web::Query<AuthCallbackParams>, session: Session) ->  
         .await {
             Ok(result) => result,
             Err(e) => {
-                println!("{:#?}", e);
                 return Ok(HttpResponse::InternalServerError().body("Error during token exchange"));
             }
         };
@@ -76,7 +75,6 @@ async fn callback(params: web::Query<AuthCallbackParams>, session: Session) ->  
         .await {
             Ok(result) => result,
             Err(e) => {
-                println!("{:#?}", e);
                 return Ok(HttpResponse::InternalServerError().body("Error during get email"));
             }
         };
@@ -84,14 +82,12 @@ async fn callback(params: web::Query<AuthCallbackParams>, session: Session) ->  
         let user_info = match user_info_response.json::<UserInfo>().await {
             Ok(result) => result,
             Err(e) => {
-                println!("{:#?}", e);
                 return Ok(HttpResponse::InternalServerError().body("Error during get email2"));
             }
         };
         let _ = session.insert("email", user_info.email.clone());
     }
     else {
-        println!("{:#?}", user_info_response.error_for_status().unwrap_err());
         return Ok(HttpResponse::InternalServerError().body("Error during get email3"));
     }
     Ok(HttpResponse::Found().append_header(("Location", "/account")).finish())
@@ -117,3 +113,4 @@ struct AuthCallbackParams {
 struct UserInfo {
     email: String,
 }
+:
