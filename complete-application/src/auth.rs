@@ -42,11 +42,11 @@ async fn login(session: Session) -> impl Responder {
 
 #[get("/callback")]
 async fn callback(params: web::Query<AuthCallbackParams>, session: Session) ->  Result<HttpResponse, Error> {
-    // confirm pkce match
+    // verify OAuth state
     let received_state = &params.state;
     if let Ok(saved_state) = session.get::<String>("csrf_token") {
         if saved_state != Some(received_state.clone()) {
-            return Ok(HttpResponse::BadRequest().body("PKCE state mismatch"));
+            return Ok(HttpResponse::BadRequest().body("OAuth state mismatch"));
         }
     }
     else {
@@ -61,7 +61,7 @@ async fn callback(params: web::Query<AuthCallbackParams>, session: Session) ->  
         .request_async(async_http_client)
         .await {
             Ok(result) => result,
-            Err(e) => {
+            Err(_e) => {
                 return Ok(HttpResponse::InternalServerError().body("Error during token exchange"));
             }
         };
@@ -74,14 +74,14 @@ async fn callback(params: web::Query<AuthCallbackParams>, session: Session) ->  
         .send()
         .await {
             Ok(result) => result,
-            Err(e) => {
+            Err(_e) => {
                 return Ok(HttpResponse::InternalServerError().body("Error during get email"));
             }
         };
     if user_info_response.status().is_success() {
         let user_info = match user_info_response.json::<UserInfo>().await {
             Ok(result) => result,
-            Err(e) => {
+            Err(_e) => {
                 return Ok(HttpResponse::InternalServerError().body("Error during get email2"));
             }
         };
@@ -113,4 +113,3 @@ struct AuthCallbackParams {
 struct UserInfo {
     email: String,
 }
-:

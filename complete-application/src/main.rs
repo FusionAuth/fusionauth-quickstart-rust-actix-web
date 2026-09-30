@@ -113,4 +113,3 @@ fn calculate_change(amount: &str, state: &mut HashMap::<&str, String>) -> () {
     let pennies = total_cents - nickels * 5;
     state.insert("pennies", format!("{}", pennies));
 }
-:
